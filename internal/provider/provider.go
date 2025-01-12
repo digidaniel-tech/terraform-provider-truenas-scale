@@ -40,10 +40,18 @@ func (p *ScaffoldingProvider) Metadata(ctx context.Context, req provider.Metadat
 func (p *ScaffoldingProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"endpoint": schema.StringAttribute{
-				MarkdownDescription: "Example provider attribute",
-				Optional:            true,
+			"host": schema.StringAttribute{
+				MarkdownDescription:    "Host to Truenas",
+                Required:               true,
 			},
+            "username": schema.StringAttribute{
+                MarkdownDescription:    "Username used to authenticate towards truenas",
+                Required:               true,
+            },
+            "password": schema.StringAttribute{
+                MarkdownDescription:    "Password used to authenticate towards truenas",
+                Required:               true,
+            },
 		},
 	}
 }
