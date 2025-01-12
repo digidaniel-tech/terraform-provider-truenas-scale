@@ -1,4 +1,4 @@
-module github.com/digidaniel/terraform-provider-truenas-scale
+module github.com/digidaniel-tech/terraform-provider-truenas-scale
 
 go 1.22.7
 

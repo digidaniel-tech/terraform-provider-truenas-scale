@@ -1,17 +1,14 @@
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
-package provider
+package appresource
 
 import (
 	"context"
 	"fmt"
 	"net/http"
-	"time"
 
-	"github.com/digidaniel/terraform-provider-truenas-scale/internal/websockethelper"
-	"github.com/google/uuid"
-	"github.com/gorilla/websocket"
+	"github.com/digidaniel-tech/terraform-provider-truenas-scale/internal/web_socket_helper"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -24,7 +21,7 @@ import (
 var _ resource.Resource = &AppResource{}
 var _ resource.ResourceWithImportState = &AppResource{}
 
-func truenas_app() resource.Resource {
+func NewAppResource() resource.Resource {
 	return &AppResource{}
 }
 
@@ -41,40 +38,6 @@ type AppResourceModel struct {
     Version             types.String    `tfsdk:"version"`
     Metadata            types.Object    `tfsdk:"metadata"`
     ActiveWorkloads     types.Object    `tfsdk:"active_workloads"`
-}
-
-type WebSocketMessage struct {
-    ID               string            `json:"id"`
-    Name             string            `json:"name"`
-    State            string            `json:"state"`
-    UpgradeAvailable bool              `json:"upgrade_available"`
-    HumanVersion     string            `json:"human_version"`
-    Version          string            `json:"version"`
-    Metadata         map[string]string `json:"metadata"`
-    ActiveWorkloads  map[string]string `json:"active_workloads"`
-}
-
-type JobResponse struct {
-    Msg    string               `json:"msg"`
-	ID     string               `json:"id"`
-	Result []JobResponseResult  `json:"result"`
-}
-
-type JobResponseResult struct {
-	ID       int                    `json:"id"`
-	State    string                 `json:"state"`
-	Progress JobResponseProgress    `json:"progress"`
-	Error  interface{}              `json:"error"`
-	Result interface{}              `json:"result"`
-}
-
-type JobResponseProgress struct {
-    Percent     float64 `json:"percent"`
-	Description string  `json:"description"`
-}
-
-func (r *AppResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_app"
 }
 
 func (r *AppResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -159,7 +122,7 @@ func (r *AppResource) Create(ctx context.Context, req resource.CreateRequest, re
     }
     defer client.Close()
 
-    requestID, err := client.Send("catalog.sync_all", nil)
+    _, err = client.Send("catalog.sync_all", nil)
 	if err != nil {
 		resp.Diagnostics.AddError("WebSocket Error", fmt.Sprintf("Failed to send message: %s", err))
 		return
@@ -187,11 +150,52 @@ func (r *AppResource) Create(ctx context.Context, req resource.CreateRequest, re
 	tflog.Debug(ctx, fmt.Sprintf("Job completed with state: %s", state))
 
 	// Uppdatera Terraform-staten
-	data.Id = jobID       // Exempel på att sätta jobID som resursens ID
-	data.Status = state        // Sätt job-status till state
-	data.LastUpdated = time.Now().Format(time.RFC3339) // Sätt tidsstämpel
+	// data.Id = jobID       // Exempel på att sätta jobID som resursens ID
+	// data.Status = state        // Sätt job-status till state
+	// data.LastUpdated = time.Now().Format(time.RFC3339) // Sätt tidsstämpel
 
 	// Save data into Terraform state
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+func (r *AppResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data AppResourceModel
+
+	// Read Terraform prior state data into the model
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// If applicable, this is a great opportunity to initialize any necessary
+	// provider client data and make a call using it.
+	// httpResp, err := r.client.Do(httpReq)
+	// if err != nil {
+	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete example, got error: %s", err))
+	//     return
+	// }
+}
+
+func (r *AppResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data AppResourceModel
+
+	// Read Terraform plan data into the model
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// If applicable, this is a great opportunity to initialize any necessary
+	// provider client data and make a call using it.
+	// httpResp, err := r.client.Do(httpReq)
+	// if err != nil {
+	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update example, got error: %s", err))
+	//     return
+	// }
+
+	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -217,45 +221,8 @@ func (r *AppResource) Read(ctx context.Context, req resource.ReadRequest, resp *
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *AppResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data AppResourceModel
-
-	// Read Terraform plan data into the model
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	// If applicable, this is a great opportunity to initialize any necessary
-	// provider client data and make a call using it.
-	// httpResp, err := r.client.Do(httpReq)
-	// if err != nil {
-	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update example, got error: %s", err))
-	//     return
-	// }
-
-	// Save updated data into Terraform state
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-}
-
-func (r *AppResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data AppResourceModel
-
-	// Read Terraform prior state data into the model
-	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	// If applicable, this is a great opportunity to initialize any necessary
-	// provider client data and make a call using it.
-	// httpResp, err := r.client.Do(httpReq)
-	// if err != nil {
-	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete example, got error: %s", err))
-	//     return
-	// }
+func (r *AppResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_app"
 }
 
 func (r *AppResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

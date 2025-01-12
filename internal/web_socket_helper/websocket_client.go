@@ -46,7 +46,7 @@ func (c *WebSocketClient) Receive() (map[string]interface{}, error) {
 	return response, nil
 }
 
-func (c *WebSocketClient) PollJobStatus(jobID int) (JobResponse, error) {
+func (c *WebSocketClient) PollJobStatus(jobID int) (string, error) {
 	for {
 		time.Sleep(2 * time.Second)
 
