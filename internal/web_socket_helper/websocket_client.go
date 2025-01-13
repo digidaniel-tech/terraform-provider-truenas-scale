@@ -92,4 +92,3 @@ func (c *WebSocketClient) PollJobStatus(jobID int) (string, error) {
 func (c *WebSocketClient) Close() {
 	c.conn.Close()
 }
-

@@ -37,17 +37,17 @@ func (p *TruenasScaleProvider) Schema(ctx context.Context, req provider.SchemaRe
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"host": schema.StringAttribute{
-				MarkdownDescription:    "Host to Truenas",
-                Required:               true,
+				MarkdownDescription: "Host to Truenas",
+				Required:            true,
 			},
-            "username": schema.StringAttribute{
-                MarkdownDescription:    "Username used to authenticate towards truenas",
-                Required:               true,
-            },
-            "password": schema.StringAttribute{
-                MarkdownDescription:    "Password used to authenticate towards truenas",
-                Required:               true,
-            },
+			"username": schema.StringAttribute{
+				MarkdownDescription: "Username used to authenticate towards truenas",
+				Required:            true,
+			},
+			"password": schema.StringAttribute{
+				MarkdownDescription: "Password used to authenticate towards truenas",
+				Required:            true,
+			},
 		},
 	}
 }

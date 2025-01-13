@@ -30,14 +30,14 @@ type AppResource struct {
 }
 
 type AppResourceModel struct {
-    Name                types.String    `tfsdk:"name"`
-    Id                  types.String    `tfsdk:"id"`
-    State               types.String    `tfsdk:"state"`
-    UpgradeAvailable    types.Bool      `tfsdk:"upgrade_available"`
-    HumanVersion        types.String    `tfsdk:"human_version"`
-    Version             types.String    `tfsdk:"version"`
-    Metadata            types.Object    `tfsdk:"metadata"`
-    ActiveWorkloads     types.Object    `tfsdk:"active_workloads"`
+	Name             types.String `tfsdk:"name"`
+	Id               types.String `tfsdk:"id"`
+	State            types.String `tfsdk:"state"`
+	UpgradeAvailable types.Bool   `tfsdk:"upgrade_available"`
+	HumanVersion     types.String `tfsdk:"human_version"`
+	Version          types.String `tfsdk:"version"`
+	Metadata         types.Object `tfsdk:"metadata"`
+	ActiveWorkloads  types.Object `tfsdk:"active_workloads"`
 }
 
 func (r *AppResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -46,40 +46,40 @@ func (r *AppResource) Schema(ctx context.Context, req resource.SchemaRequest, re
 		MarkdownDescription: "App resource",
 
 		Attributes: map[string]schema.Attribute{
-            "custom_app": schema.BoolAttribute{
-                MarkdownDescription:    "Catalog or custom app",
-                Required:               false,
-                Optional:               true,
-                Default:                booldefault.StaticBool(false),
-            },
-            "values": schema.ObjectAttribute{
-                MarkdownDescription:    "Application settings, ex. volumes, environment variables.",
-                Optional:               true,
-            },
-            "custom_compose_config": schema.ObjectAttribute{
-                MarkdownDescription:    "Custom app configuration as an object",
-                Optional:               true,
-            },
-            "custom_compose_config_string": schema.StringAttribute{
-                MarkdownDescription:    "Custom app configuration as yaml",
-                Optional:               true,
-            },
-            "catalog_app": schema.StringAttribute{
-                MarkdownDescription:    "Catalog app to use when installing application",
-                Optional:               true,
-            },
-            "app_name": schema.StringAttribute{
-                MarkdownDescription:    "Application name to be set for installed application",
-                Required:               true,
-            },
-            "train": schema.StringAttribute{
-                MarkdownDescription:    "Train to use when download application, ex. stable, test, community.",
-                Optional:               true,
-            },
-            "version": schema.StringAttribute{
-                MarkdownDescription:    "Version of application to use",
-                Optional:               true,
-            },
+			"custom_app": schema.BoolAttribute{
+				MarkdownDescription: "Catalog or custom app",
+				Required:            false,
+				Optional:            true,
+				Default:             booldefault.StaticBool(false),
+			},
+			"values": schema.ObjectAttribute{
+				MarkdownDescription: "Application settings, ex. volumes, environment variables.",
+				Optional:            true,
+			},
+			"custom_compose_config": schema.ObjectAttribute{
+				MarkdownDescription: "Custom app configuration as an object",
+				Optional:            true,
+			},
+			"custom_compose_config_string": schema.StringAttribute{
+				MarkdownDescription: "Custom app configuration as yaml",
+				Optional:            true,
+			},
+			"catalog_app": schema.StringAttribute{
+				MarkdownDescription: "Catalog app to use when installing application",
+				Optional:            true,
+			},
+			"app_name": schema.StringAttribute{
+				MarkdownDescription: "Application name to be set for installed application",
+				Required:            true,
+			},
+			"train": schema.StringAttribute{
+				MarkdownDescription: "Train to use when download application, ex. stable, test, community.",
+				Optional:            true,
+			},
+			"version": schema.StringAttribute{
+				MarkdownDescription: "Version of application to use",
+				Optional:            true,
+			},
 		},
 	}
 }
@@ -114,40 +114,40 @@ func (r *AppResource) Create(ctx context.Context, req resource.CreateRequest, re
 		return
 	}
 
-    url := "wss://nas.home.wollbro.se/api/v1/websocket"
+	url := "wss://nas.home.wollbro.se/api/v1/websocket"
 
-    client, err := websockethelper.NewWebSocketClient(url)
-    if err != nil {
-        resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create app, got error: %s", err))
-        return
-    }
-    defer client.Close()
+	client, err := websockethelper.NewWebSocketClient(url)
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create app, got error: %s", err))
+		return
+	}
+	defer client.Close()
 
-    _, err = client.Send("catalog.sync_all", nil)
+	_, err = client.Send("catalog.sync_all", nil)
 	if err != nil {
 		resp.Diagnostics.AddError("WebSocket Error", fmt.Sprintf("Failed to send message: %s", err))
 		return
 	}
 
-    response, err := client.Receive()
+	response, err := client.Receive()
 	if err != nil {
 		resp.Diagnostics.AddError("WebSocket Error", fmt.Sprintf("Failed to read response: %s", err))
 		return
 	}
 
-    jobID, ok := response["result"].(float64)
+	jobID, ok := response["result"].(float64)
 	if !ok {
 		resp.Diagnostics.AddError("Response Error", "Invalid job_id received")
 		return
 	}
 
-    state, err := client.PollJobStatus(int(jobID))
+	state, err := client.PollJobStatus(int(jobID))
 	if err != nil {
 		resp.Diagnostics.AddError("Job Status Error", fmt.Sprintf("Job failed: %s", err))
 		return
 	}
 
-    // Logga resultatet
+	// Logga resultatet
 	tflog.Debug(ctx, fmt.Sprintf("Job completed with state: %s", state))
 
 	// Uppdatera Terraform-staten
