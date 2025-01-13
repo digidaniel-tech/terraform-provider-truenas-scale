@@ -49,30 +49,27 @@ func (r *AppResource) Schema(ctx context.Context, req resource.SchemaRequest, re
 		Attributes: map[string]schema.Attribute{
 			"custom_app": schema.BoolAttribute{
 				MarkdownDescription: "Catalog or custom app",
-				Required:            false,
 				Optional:            true,
+				Computed:			 true,
 				Default:             booldefault.StaticBool(false),
 			},
 			"values": schema.ObjectAttribute{
 				MarkdownDescription: "Application settings, ex. volumes, environment variables.",
-				Required:            false,
 				Optional:            true,
 				AttributeTypes:      map[string]attr.Type{},
 			},
 			"custom_compose_config": schema.ObjectAttribute{
 				MarkdownDescription: "Custom app configuration as an object",
-				Required:            false,
 				Optional:            true,
+				AttributeTypes:      map[string]attr.Type{},
 			},
 			"custom_compose_config_string": schema.StringAttribute{
 				MarkdownDescription: "Custom app configuration as yaml",
-				Required:            false,
 				Optional:            true,
 				CustomType:          types.StringType,
 			},
 			"catalog_app": schema.StringAttribute{
 				MarkdownDescription: "Catalog app to use when installing application",
-				Required:            false,
 				Optional:            true,
 			},
 			"app_name": schema.StringAttribute{
@@ -81,12 +78,10 @@ func (r *AppResource) Schema(ctx context.Context, req resource.SchemaRequest, re
 			},
 			"train": schema.StringAttribute{
 				MarkdownDescription: "Train to use when download application, ex. stable, test, community.",
-				Required:            false,
 				Optional:            true,
 			},
 			"version": schema.StringAttribute{
 				MarkdownDescription: "Version of application to use",
-				Required:            false,
 				Optional:            true,
 			},
 		},
