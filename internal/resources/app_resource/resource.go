@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/digidaniel-tech/terraform-provider-truenas-scale/internal/web_socket_helper"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -54,18 +55,24 @@ func (r *AppResource) Schema(ctx context.Context, req resource.SchemaRequest, re
 			},
 			"values": schema.ObjectAttribute{
 				MarkdownDescription: "Application settings, ex. volumes, environment variables.",
+				Required:            false,
 				Optional:            true,
+				AttributeTypes:      map[string]attr.Type{},
 			},
 			"custom_compose_config": schema.ObjectAttribute{
 				MarkdownDescription: "Custom app configuration as an object",
+				Required:            false,
 				Optional:            true,
 			},
 			"custom_compose_config_string": schema.StringAttribute{
 				MarkdownDescription: "Custom app configuration as yaml",
+				Required:            false,
 				Optional:            true,
+				CustomType:          types.StringType,
 			},
 			"catalog_app": schema.StringAttribute{
 				MarkdownDescription: "Catalog app to use when installing application",
+				Required:            false,
 				Optional:            true,
 			},
 			"app_name": schema.StringAttribute{
@@ -74,10 +81,12 @@ func (r *AppResource) Schema(ctx context.Context, req resource.SchemaRequest, re
 			},
 			"train": schema.StringAttribute{
 				MarkdownDescription: "Train to use when download application, ex. stable, test, community.",
+				Required:            false,
 				Optional:            true,
 			},
 			"version": schema.StringAttribute{
 				MarkdownDescription: "Version of application to use",
+				Required:            false,
 				Optional:            true,
 			},
 		},
