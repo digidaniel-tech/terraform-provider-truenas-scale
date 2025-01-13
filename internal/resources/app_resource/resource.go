@@ -50,7 +50,7 @@ func (r *AppResource) Schema(ctx context.Context, req resource.SchemaRequest, re
 			"custom_app": schema.BoolAttribute{
 				MarkdownDescription: "Catalog or custom app",
 				Optional:            true,
-				Computed:			 true,
+				Computed:            true,
 				Default:             booldefault.StaticBool(false),
 			},
 			"values": schema.ObjectAttribute{
