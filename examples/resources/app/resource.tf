@@ -1,5 +1,5 @@
 # Copyright (c) HashiCorp, Inc.
 
-resource "scaffolding_example" "example" {
+resource "app" "example" {
   configurable_attribute = "some-value"
 }

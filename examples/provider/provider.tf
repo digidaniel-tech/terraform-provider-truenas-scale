@@ -1,5 +1,5 @@
 # Copyright (c) HashiCorp, Inc.
 
-provider "scaffolding" {
+provider "truenas-scale" {
   # example configuration here
 }

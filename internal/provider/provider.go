@@ -89,7 +89,7 @@ func (p *TruenasScaleProvider) Resources(ctx context.Context) []func() resource.
 }
 
 func (p *TruenasScaleProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
-	resp.TypeName = "scaffolding"
+	resp.TypeName = "truenas-scale"
 	resp.Version = p.version
 }
 
